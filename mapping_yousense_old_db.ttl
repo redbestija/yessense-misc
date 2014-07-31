@@ -1,0 +1,118 @@
+@prefix map: <#> .
+@prefix db: <> .
+@prefix vocab: <vocab/> .
+@prefix experience: <http://linkedearth.org/experience/ns/>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix jdbc: <http://d2rq.org/terms/jdbc/> .
+
+map:database a d2rq:Database;
+	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
+	d2rq:jdbcDSN "jdbc:mysql://localhost:3307/icqa";
+	d2rq:username "root";
+	d2rq:password "ojbre4o";
+	jdbc:autoReconnect "true";
+	jdbc:zeroDateTimeBehavior "convertToNull";
+	.
+
+# Feedback table
+map:feedback a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "experience/@@feedback.id@@";
+	d2rq:class experience:Experience;
+	d2rq:classDefinitionLabel "Experience message";
+	d2rq:classDefinitionComment "One message sent by a user";
+	.
+# user table
+map:user a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "experiencer/@@user.id@@";
+	d2rq:class experience:Experiencer;
+	d2rq:classDefinitionLabel "Experiencer";
+	d2rq:condition "user.username <> 'test'";
+	d2rq:condition "user.username <> 'Test'";
+	d2rq:condition "user.username <> 'dhbc'";
+	d2rq:condition "user.username <> 'rrwg'";
+	d2rq:condition "user.username <> 'sfs'";
+	d2rq:condition "user.username <> 'gdsv'";
+	d2rq:condition "user.username <> 'fff'";
+	d2rq:classDefinitionComment "A person who has sent a message";
+	.
+map:feedback__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feedback;
+	d2rq:property rdfs:label;
+	d2rq:pattern "Experience #@@feedback.id@@";
+	.
+map:experiencer__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:user;
+	d2rq:property rdfs:label;
+	d2rq:pattern "Experiencer #@@user.id@@";
+	.
+# Feedback table
+map:experience_time_stamp a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feedback;
+	d2rq:property experience:hasTime;
+	d2rq:column "feedback.timestamp";
+	d2rq:propertyDefinitionLabel "Timestamp";
+	d2rq:datatype xsd:dateTime;
+	.
+# EXPERIENCER
+map:experience_experiencer a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feedback;
+	d2rq:property experience:hasExperiencer;
+#	d2rq:column "user.username";
+	d2rq:refersToClassMap map:user;
+	d2rq:join "feedback.user = user.id";
+	d2rq:propertyDefinitionLabel "Experiencer";
+	.
+# OVERALL EXPERIENCE
+map:experience_overall a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feedback;
+	d2rq:property vocab:overall;
+	d2rq:propertyDefinitionLabel "Overall experience";
+	d2rq:column "feedback.overall";
+	d2rq:datatype xsd:integer;
+	.
+#ACTIVITY
+map:experience_activity a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feedback;
+	d2rq:property experience:hasActivity;
+	d2rq:propertyDefinitionLabel "Activity of a person";
+	d2rq:column "fb_activity.value";
+	d2rq:join "feedback.id = fb_activity.exp_id";
+	.
+#FEELINGS
+#map:experience_feelings a d2rq:PropertyBridge;
+#	d2rq:belongsToClassMap map:feedback;
+#	d2rq:property experience:hasEventExperience;
+#	d2rq:propertyDefinitionLabel "What a person feels now";
+#	d2rq:column "fb_adjective.value";
+#	d2rq:join "feedback.id = fb_feeling.exp_id";
+#	d2rq:join "fb_feeling.adjective = fb_adjective.id";
+#	.
+# REASON
+map:experience_reason a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feedback;
+	d2rq:property experience:hasReason;
+	d2rq:propertyDefinitionLabel "Reason";
+	d2rq:column "fb_reason.value";
+	d2rq:join "feedback.id = fb_reason.exp_id";
+	.
+# FOLLOWING ACTION
+map:experience_following_action a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feedback;
+	d2rq:property experience:hasFollowingAction;
+	d2rq:propertyDefinitionLabel "Following acion";
+	d2rq:column "fb_planned_action.value";
+	d2rq:join "feedback.id = fb_planned_action.exp_id";
+	.
+# LOCATION
+map:experience_location a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:feedback;
+	d2rq:property experience:hasLocation;
+	d2rq:propertyDefinitionLabel "Location";
+	d2rq:column "location.description";
+	d2rq:join "feedback.location = location.id";
+	.
